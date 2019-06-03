@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/beatriz-agile/amadeus-gql/issues"
   },
-  "homepage": "https://github.com/beatriz-agile/amadeus-gql#readme"
+  "homepage": "https://github.com/beatriz-agile/amadeus-gql#readme",
+  "dependencies": {
+    "request": "2.88.0",
+    "itaas-nodejs-api-framework": "git+ssh://git@github.com:agilecontent/itaas-nodejs-api-framework.git#v3.0.0",
+    "itaas-nodejs-tools": "git+https://github.com/agilecontent/itaas-nodejs-tools.git#v6.0.0"
+  }
 }
