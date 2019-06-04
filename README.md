@@ -1,2 +1,2 @@
-# amadeus-gql
+# Amadeus GQL
 Amadeus GraphQL interface (POC)
