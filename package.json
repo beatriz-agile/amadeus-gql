@@ -1,6 +1,6 @@
 {
   "name": "amadeus-gql",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Amadeus GraphQL interface",
   "main": "app/api.js",
   "scripts": {
