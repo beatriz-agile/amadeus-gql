@@ -1,6 +1,5 @@
 ﻿'use strict';
 const version = require('../../../package').version;
-const promiseAwaiter = require('../../../app/utils/promises/promise-awaiter');
 
 const quotes = [
   'Antonio Salieri: Mediocrities everywhere... I absolve you... I absolve you... '
@@ -16,89 +15,33 @@ const quotes = [
 ];
 
 class HealthCheckAction {
-  constructor(amadeusService) {
-    this.amadeusService = amadeusService;
-  }
-
-  getHome(context) {
+  static getHome(context) {
     let response = context.response();
     let quote = quotes[Math.floor(Math.random() * quotes.length)];
     return response.result({ version, quote }).end();
   }
 
-  getServiceStatus(context) {
+  static async getServiceStatus(context) {
     let response = context.response();
+    const amadeusService = context.shared.get('amadeusService');
+    
+    const serviceResult = await amadeusService.getServiceStatus();
 
-    let config = context.shared.get('config');
+    let responseStatus = 'NOT_ALL_DEPENDENCIES_OK';
 
-    let serviceStatusChecks = [
-      isServiceAvailable(context, godfatherService),
-      isServiceAvailable(context, startrekService),
-      isServiceAvailable(context, contentService),
-      isServiceAvailable(context, swordfishService),
-      isServiceAvailable(context, paybackService),
-      isServiceAvailable(context, voucherService),
-      isServiceAvailable(context, wallstreetService),
-      isServiceAvailable(context, emailVerificationService)
-    ];
+    if (serviceResult === true) {
+      responseStatus = 'ALL_DEPENDENCIES_OK';
+    }
 
-    return Promise.all(serviceStatusChecks)
-      .then((serviceStatuses) => {
-        let responseStatus;
-
-        if (serviceStatuses.every(status => status === true)) {
-          responseStatus = 'ALL_DEPENDENCIES_OK';
-        }
-        else {
-          responseStatus = 'NOT_ALL_DEPENDENCIES_OK';
-
-          context.logger.debug({
-            contentUrl: config.contentUrl,
-            godfatherUrl: config.godfatherUrl,
-            startrekUrl: config.startrekUrl,
-            swordfishUrl: config.swordfishUrl,
-            paybackUrl: config.paybackUrl,
-            voucherUrl: config.voucherUrl,
-            wallstreetUrl: config.wallstreetUrl,
-            emailVerificationUrl: config.emailVerificationUrl
-          });
-        }
-
-        let apisResult = {
-          status: responseStatus,
-          serviceConnections: {
-            godfather: serviceStatuses[0],
-            startrek: serviceStatuses[1],
-            content: serviceStatuses[2],
-            swordfish: serviceStatuses[3],
-            payback: serviceStatuses[4],
-            voucher: serviceStatuses[5],
-            wallstreet: serviceStatuses[6],
-            emailVerification: serviceStatuses[7]
-          }
-        };
-
-        // This log is important for monitoring reasons 
-        context.logger.warn(apisResult);
-
-        return response
-          .result(apisResult)
-          .end();
-      });
-  }
-}
-
-function isServiceAvailable(context, service) {
-  let timeout = context.shared.get('config').dependencyTimeoutMilliseconds;
-
-  return promiseAwaiter.wait(service.getServiceStatus(context), timeout)
-    .then((awaitedStatusCheck) => {
-      if (awaitedStatusCheck.finished) {
-        let serviceResponse = awaitedStatusCheck.value;
-        return serviceResponse && serviceResponse.isSuccess;
+    let apisResult = {
+      status: responseStatus,
+      serviceConnections: {
+        amadeus: serviceResult,
       }
-      return false;
-    });
+    };
+
+    return response.result(apisResult).end();
+  }
 }
 
 module.exports = HealthCheckAction;

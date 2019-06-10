@@ -3,8 +3,8 @@
 const framework = require('itaas-nodejs-api-framework');
 const config = require('./config')();
 
+const AmadeusService = require('./services/amadeus-service');
 const HealthCheckActionV1 = require('./actions/v1/health-check-action');
-let healthCheckAction;
 
 let apiOptions = {
   name: 'Amadeus GraphQL',
@@ -18,11 +18,13 @@ let api = framework(apiOptions);
 setupServices();
 setupRoutesV1(api);
 
+api.listen(config.port);
+
 function setupServices() {
-  healthCheckAction = new HealthCheckActionV1(new AmadeusService(config.amadeusUrl));
+  api.shared.set('amadeusService', new AmadeusService(config.amadeusUrl));
 }
 
 function setupRoutesV1(api) {
-  api.get('/', [healthCheckAction.getHome]);
-  api.get('/v1/serviceStatus', [healthCheckAction.getServiceStatus]);
+  api.get('/', [HealthCheckActionV1.getHome]);
+  api.get('/v1/serviceStatus', [HealthCheckActionV1.getServiceStatus]);
 }

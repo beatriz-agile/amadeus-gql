@@ -1,12 +1,13 @@
 'use strict';
+const Service = require('./service');
 
-class AmadeusService {
-  constructor(url) {
-    this.url = url;
-  }
-
-  getServiceStatus() {
-    return true;
+class AmadeusService extends Service {
+  async getServiceStatus() {
+    const response = await this.get('/v1/serviceStatus');
+    if (response.result.status === 'ALL_DEPENDENCIES_OK') {
+      return true;
+    }
+    return false;
   }
 }
 
