@@ -1,0 +1,25 @@
+{
+  "name": "amadeus-gql",
+  "version": "0.1.0",
+  "description": "Amadeus GraphQL interface",
+  "main": "app/api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beatriz-agile/amadeus-gql.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/beatriz-agile/amadeus-gql/issues"
+  },
+  "homepage": "https://github.com/beatriz-agile/amadeus-gql#readme",
+  "dependencies": {
+    "itaas-nodejs-api-framework": "git+ssh://git@github.com:agilecontent/itaas-nodejs-api-framework.git#v3.0.0",
+    "itaas-nodejs-tools": "git+https://github.com/agilecontent/itaas-nodejs-tools.git#v6.0.0",
+    "request": "2.88.0",
+    "request-promise": "^4.2.4"
+  }
+}
