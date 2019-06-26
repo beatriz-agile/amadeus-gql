@@ -1,30 +1,47 @@
 'use strict';
 
-const framework = require('itaas-nodejs-api-framework');
+const express = require('express');
+const express_graphql = require('express-graphql');
+const { buildSchema } = require('graphql');
 const config = require('./config')();
+const TransactionsAction = require('./actions/v1/transactions-action');
 
-const AmadeusService = require('./services/amadeus-service');
-const HealthCheckActionV1 = require('./actions/v1/health-check-action');
+const schema = buildSchema(`
+    type Query {
+      transactions(customerId: String!): [Transaction]
+    },
+    type Transaction {
+      id: String,
+      status: String,
+      statusDetails: String,
+      methodName: String,
+      instanceId: String,
+      customerId: String,
+      description: String,
+      products: [Product],
+      fee: String,
+      tax: String,
+      total: String,
+      currency: String
+    },
+    type Product {
+      externalId: String,
+      name: String,
+      description: String,
+      quantity: String,
+      unitPrice: String,
+      unitTax: String
+    }
+`);
 
-let apiOptions = {
-  name: 'Amadeus GraphQL',
-  logLevels: config.logLevels,
-  logOutput: config.logOutput,
-  logDirectory: config.logDirectory
+const root = {
+  transactions: TransactionsAction.getTransactions
 };
 
-let api = framework(apiOptions);
-
-setupServices();
-setupRoutesV1(api);
-
-api.listen(config.port);
-
-function setupServices() {
-  api.shared.set('amadeusService', new AmadeusService(config.amadeusUrl));
-}
-
-function setupRoutesV1(api) {
-  api.get('/', [HealthCheckActionV1.getHome]);
-  api.get('/v1/serviceStatus', [HealthCheckActionV1.getServiceStatus]);
-}
+const app = express();
+app.use('/graphql', express_graphql({
+    schema: schema,
+    rootValue: root,
+    graphiql: true
+}));
+app.listen(config.port, () => console.log(`Express GraphQL Server Now Running On localhost:${config.port}/graphql`));

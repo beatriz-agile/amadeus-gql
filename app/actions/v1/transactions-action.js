@@ -1,21 +1,35 @@
 ﻿'use strict';
+const request = require('request');
+const { amadeusUrl } = require('../../config')();
 
 class TransactionsAction {
-  static async getTransactions(context) {
-    const response = context.response();
-    const amadeusService = context.shared.get('amadeusService');
+  static async getTransactions(request) {
+    const instanceId = request.instanceId;
+    const customerId = request.customerId;
 
-    const transactionsResult = await amadeusService.getTransactionsByCustomer(context, parameters.instanceId,
-      parameters.customerId, parameters.query, parameters.fields, parameters.offset, parameters.limit);
+    const transactionsResult = await getTransactionsFromAmadeus(instanceId, customerId);
 
     if (!transactionsResult.isSuccess) {
       return serviceError(serviceResult, response);
     }
     
     const body = transactionsResult.body;
-    const result = body && body.result ? body.result : {};
-    return response.result(result).end();
+    return body && body.result ? body.result : {};
   }
+}
+
+function getTransactionsFromAmadeus(instanceId, customerId) {
+  return new Promise((resolve, reject) => {
+    request({
+      method: 'GET',
+      url: `${amadeusUrl}/${instanceId}/v1/customers/${customerId}/transactions`,
+      json: true
+    }, (err, response, body) => {
+      let serviceResponse =
+        PaybackResponseHandler.createResponse(context, err, response, body);
+      return resolve(serviceResponse);
+    });
+  });
 }
 
 module.exports = TransactionsAction;
