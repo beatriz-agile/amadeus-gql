@@ -21,6 +21,7 @@ const schema = buildSchema(`
       products: [Product],
       fee: String,
       tax: String,
+      discount: String,
       total: String,
       currency: String
     },
